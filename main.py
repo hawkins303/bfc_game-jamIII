@@ -49,8 +49,6 @@ def update():
             bullet.color = color.white
             # Reduce speed over time
             bullet_speed = bullet.speed * (bullet.bullet_timer / bullet.TOTAL_TIME) * time.dt
-            bullet.position += bullet.move_dir * bullet_speed
-            bullet.bullet_timer -= time.dt
 
             # Bounce bullet off walls
             for wall in walls:
@@ -58,7 +56,10 @@ def update():
                 if hit_info.hit:
                     bullet.move_dir = bullet.move_dir - 2 * (bullet.move_dir.dot(hit_info.normal)) * hit_info.normal
 
+            bullet.position += bullet.move_dir * bullet_speed
+
             # When time runs out, drop the bullet
+            bullet.bullet_timer -= time.dt
             if (bullet.bullet_timer <= 0.0):
                 bullet.state = BulletState.DROPPED
         case BulletState.DROPPED:
