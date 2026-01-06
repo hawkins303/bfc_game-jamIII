@@ -29,17 +29,46 @@ bullet = Entity(model='circle', scale=.01, collider='box',
 
 # Wall entities
 walls = [
-    Entity(position = Vec3(0.7, 0.0, 0.0), scale=Vec3(.01, 1.0, 1), model='quad', collider='box'),
-    Entity(position = Vec3(-0.7, 0.0, 0.0), scale=Vec3(.01, 1.0, 1), model='quad', collider='box'),
-    Entity(position = Vec3(0.0, 0.5, 0.0), scale=Vec3(1.4, 0.01, 1), model='quad', collider='box'),
-    Entity(position = Vec3(0.0, -0.5, 0.0), scale=Vec3(1.4, 0.01, 1), model='quad', collider='box'),
+    Entity(position = Vec3(0.0, 0.5, 0.0), scale=Vec3(1.4, 0.05, 1), color=color.blue, model='quad', collider='box'),
+    Entity(position = Vec3(0.0, -0.5, 0.0), scale=Vec3(1.4, 0.05, 1),color=color.blue, model='quad', collider='box'),
+    Entity(position = Vec3(0.7, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box'),
+    Entity(position = Vec3(-0.7, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box'),
 ]
 
 def update():
     # Player logic
     player.move_dir = Vec3(held_keys['d'] - held_keys['a'], held_keys['w'] - held_keys['s'], 0).normalized()
-    player.position += player.move_dir * player.speed * time.dt
-    
+    player_speed = player.speed * time.dt
+
+    # Player collision for walls
+    if abs(player.move_dir.x) + abs(player.move_dir.y) != 0.0:
+        player_collision_done = False
+        wall_ignore_list = [bullet, player]
+        while not player_collision_done:
+            hit_info = raycast(origin=player.position, direction=player.move_dir, distance=player_speed, ignore=wall_ignore_list, debug=False)
+            if hit_info.hit:
+                vec_from_p = player.move_dir * player_speed
+                vec_a = -player.move_dir * (player_speed - hit_info.distance)
+                vec_b = hit_info.normal
+                # Skip colliding with inside of walls
+                if vec_a.dot(vec_b) >= 0:
+
+                    proj_a_to_b = vec_a.dot(vec_b) * vec_b
+
+                    target_vec = vec_from_p + proj_a_to_b
+                    # if proj_a_to_b.x + proj_a_to_b.y == 0:
+                    # Add a bumper zone for the wall
+                    target_vec -= target_vec.normalized() * 0.001
+
+                    player.move_dir = target_vec.normalized()
+                    player_speed = distance(Vec3(0,0,0), target_vec)
+                wall_ignore_list.append(hit_info.entity)
+            else:
+                player_collision_done = True
+
+        # Move player
+        player.position += player.move_dir * player_speed
+
     # Handle bullet logic
     match(bullet.state):
         case BulletState.HELD:
@@ -51,10 +80,9 @@ def update():
             bullet_speed = bullet.speed * (bullet.bullet_timer / bullet.TOTAL_TIME) * time.dt
 
             # Bounce bullet off walls
-            for wall in walls:
-                hit_info = raycast(bullet.position, bullet.move_dir, ignore=(bullet,player), distance=bullet_speed, debug=False)
-                if hit_info.hit:
-                    bullet.move_dir = bullet.move_dir - 2 * (bullet.move_dir.dot(hit_info.normal)) * hit_info.normal
+            hit_info = raycast(bullet.position, bullet.move_dir, ignore=(bullet,player), distance=bullet_speed, debug=False)
+            if hit_info.hit:
+                bullet.move_dir = bullet.move_dir - 2 * (bullet.move_dir.dot(hit_info.normal)) * hit_info.normal
 
             bullet.position += bullet.move_dir * bullet_speed
 
