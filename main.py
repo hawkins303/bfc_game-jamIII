@@ -83,9 +83,18 @@ def update():
             hit_info = raycast(bullet.position, bullet.move_dir, ignore=(bullet,player), distance=bullet_speed, debug=False)
             if hit_info.hit:
                 bullet.move_dir = bullet.move_dir - 2 * (bullet.move_dir.dot(hit_info.normal)) * hit_info.normal
+		
+		#when bullet hits objects, that are not enemies
+                ting = Entity(name='ting_parent', model='circle', scale=Vec3(.1, .1, 0))
+                tingText = Text(text='TING', origin=(0, 0))
+                ting.position = bullet.position
+                tingText.position = bullet.position
+                tingText.color = color.red
+                ting.fade_out(duration=.2)
+                tingText.fade_out(duration=.2)
 
             bullet.position += bullet.move_dir * bullet_speed
-
+		
             # When time runs out, drop the bullet
             bullet.bullet_timer -= time.dt
             if (bullet.bullet_timer <= 0.0):
@@ -104,5 +113,16 @@ def input(key):
             bullet.position = player.position
             bullet.move_dir = (mouse.position - player.position).normalized()
             bullet.bullet_timer = bullet.TOTAL_TIME
+		
+	   # bang sound effect bubble
+            bang = Entity(name='bang_parent', model='circle', scale=Vec3(.1, .1, 0), origin=(.5, .5))
+            bangText = Text(text='BANG', origin=(.75,1.75))
+            bang.enable()
+            bangText.enable()
+            bang.position = bullet.position
+            bangText.position =bullet.position
+            bangText.color = color.red
+            bang.fade_out(duration=.2)
+            bangText.fade_out(duration=.2)
 
 app.run()
