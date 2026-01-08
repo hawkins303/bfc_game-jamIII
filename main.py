@@ -1,7 +1,9 @@
 from ursina import *
 from enum import Enum
+from sound_collection import SoundCollection
 
 app = Ursina()
+sounds = SoundCollection()
 
 window.color = color.black
 camera.orthographic = True
@@ -34,6 +36,8 @@ walls = [
     Entity(position = Vec3(0.7, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box'),
     Entity(position = Vec3(-0.7, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box'),
 ]
+
+sounds.background_sound.play(start=0)
 
 def update():
     # Player logic
@@ -75,6 +79,8 @@ def update():
             # Bullet is being held, make invisible
             bullet.color = color.clear
         case BulletState.SHOOTING:
+            sounds.shoot_sound.play()
+
             bullet.color = color.white
             # Reduce speed over time
             bullet_speed = bullet.speed * (bullet.bullet_timer / bullet.TOTAL_TIME) * time.dt
@@ -92,6 +98,7 @@ def update():
                 tingText.color = color.red
                 ting.fade_out(duration=.2)
                 tingText.fade_out(duration=.2)
+                sounds.bullet_bounce_sound.play()
 
             bullet.position += bullet.move_dir * bullet_speed
 		
@@ -104,6 +111,7 @@ def update():
             if bullet.intersects(player).hit:
                 # Player picks up bullet
                 bullet.state = BulletState.HELD
+                sounds.reload_sound.play()
 
 def input(key):
     if key == "left mouse down":
