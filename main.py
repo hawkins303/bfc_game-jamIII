@@ -79,7 +79,6 @@ def update():
             # Bullet is being held, make invisible
             bullet.color = color.clear
         case BulletState.SHOOTING:
-            sounds.shoot_sound.play()
 
             bullet.color = color.white
             # Reduce speed over time
@@ -132,5 +131,6 @@ def input(key):
             bangText.color = color.red
             bang.fade_out(duration=.2)
             bangText.fade_out(duration=.2)
+            sounds.shoot_sound.play()
 
 app.run()
