@@ -1,6 +1,7 @@
 from gc import disable
 
 from direct.distributed.DistributedSmoothNode import globalActivateSmoothing
+from panda3d.interrogatedb import interrogate_type_number_of_enum_values
 from ursina import *
 from enum import Enum
 
@@ -33,7 +34,7 @@ bullet = Entity(model='circle', scale=.01,collider='box',
 
 # Define enemy entity
 class EnemyMovePattern(Enum):
-    HLINE = 0  # travel back and forth on a horizontal line
+    HLINE = 1  # travel back and forth on a horizontal line
     VLINE = 5  # travel back and forth on a vertical line
     BOX = 0  # travel in a box pattern
     FOLLOW = 2  # follow towards the player position
@@ -62,7 +63,7 @@ class Enemy(Entity):
 # a pattern from the EnemyMovePattern Enum
 # a starting Vector so it knows which way to begin moving in
 enemy_list = [
-    # Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.FOLLOW,starting_direction=Vec3(0.0, 0.0, 0.0))
+    #Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1",pattern=EnemyMovePattern.HLINE,starting_direction=Vec3(0.0, 0.0, 0.0),movement_distance=.5),
     Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.5),
     Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0), movement_distance=.5)
     # Enemy(position=Vec3(-0.2, -0.1, 0.0), name="thing3", pattern=EnemyMovePattern.BOX, starting_direction=Vec3(1.0, 0.0, 0.0))
@@ -72,11 +73,11 @@ enemy_list = [
 for enemy in enemy_list:
     enemy.entity.collider = SphereCollider(enemy, radius=.8)  # adjust colliders
     enemy.entity.speed += random.randrange(0, 5) * 0.05  # tweak the speed to be randomish per enemy
-    r_sprite = SpriteSheetAnimation(parent=enemy.entity,texture="/assets/robot_sprite_walk.png", autoplay=True,tileset_scale=[2, 2],
-                                    tileset_size=[4, 4], fps=4,
-                                    animations={'idle': ((0, 3), (3, 3)), 'walk_down': ((0, 3), (3, 3)),
-                                                'walk_up': ((0, 2), (3, 2)), 'walk_left': ((0, 1), (3, 1)),
-                                                'walk_right': ((0, 0), (3, 0))})
+    r_sprite = SpriteSheetAnimation(parent=enemy.entity, texture="/assets/robot_sprite_walk1.png", autoplay=True,tileset_size=[4, 5], fps=2,
+                                    animations={'idle': ((0, 4), (3, 4)), 'walk_down': ((0, 4), (3, 4)),
+                                                'walk_up': ((0, 3), (3, 3)), 'walk_left': ((0, 2), (3, 2)),
+                                               'walk_right': ((0, 1), (3, 1)), 'death':((0,0),(1, 0))})
+    r_sprite.play_animation('idle')
 
 # Wall entities
 walls = [
@@ -126,12 +127,13 @@ def update_enemy(enemy):
     # depending on the movement pattern they have defined
     match enemy.pattern:
         case EnemyMovePattern.HLINE:
-            enemy.move_dir = enemy.starting_direction
 
+            enemy.move_dir = enemy.starting_direction
             # compare current and starting positions
             # if it moves too far one way, reverse and head back the other way
             if abs(enemy.x) > abs(enemy.starting_position.x + .5):
-                enemy.move_dir.x = -enemy.move_dir.x  # Reverse direction
+                enemy.move_dir.x = -enemy.move_dir.x # Reverse direction
+
             enemy_speed = enemy.speed * time.dt
 
         case EnemyMovePattern.VLINE:
@@ -162,13 +164,13 @@ def update_enemy(enemy):
     if enemy.intersects(bullet) and bullet.state == BulletState.SHOOTING:
         sounds.enemy_hit.play()
         # Guess I'll die
-        enemy.disable()
+        #r_sprite.play_animation('death')
 
     # enemy player collision
     if enemy.intersects(player) and enemy.enabled:
         # Game over man, game over
         sounds.player_hit.play() # this repeats a bunch because i haven't figured out better logic
-        
+
 
     # enemy wall collision
     enemy_wall_collision(enemy, enemy_speed)
@@ -177,14 +179,11 @@ def update_enemy(enemy):
     enemy.position += enemy.move_dir * enemy_speed
 
 
-
 def update():
-    scene.entities = [player, bullet] # for some reason adding enemy here results in an error because it isn't quite defined in this scope or something
-    # Player logic
+
     global startingGame
     if startingGame:
         startTitle.enable()
-
         if held_keys["enter"]:
             startingGame = False
             startTitle.disable()
@@ -192,9 +191,7 @@ def update():
                 enemy.entity.enable()      
         return
 
-
-
-
+    # Player logic
     player.move_dir = Vec3(held_keys['d'] - held_keys['a'], held_keys['w'] - held_keys['s'], 0).normalized()
     player_speed = player.speed * time.dt
     # n_robs = 3
