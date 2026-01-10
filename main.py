@@ -1,19 +1,20 @@
+from gc import disable
+
+from direct.distributed.DistributedSmoothNode import globalActivateSmoothing
 from ursina import *
 from enum import Enum
+
+import player
+from player import *
 from sound_collection import SoundCollection
 
 app = Ursina()
 sounds = SoundCollection()
-
+startTitle = Entity(model="quad", texture="/assets/title.png",disabled=True,position=Vec3(0,0,-3))
 window.color = color.black
 camera.orthographic = True
 camera.fov = 1
-
-# Define player entity
-player = Entity(model='circle', scale=.05, collider='box',
-        move_dir=Vec3(0,0,0),   # Player movement direction
-        speed = 0.5             # Player move speed
-    )
+speed = .5
 
 class BulletState(Enum):
     HELD = 0
@@ -21,7 +22,7 @@ class BulletState(Enum):
     DROPPED = 2
 
 # Define bullet Entity
-bullet = Entity(model='circle', scale=.01, collider='box',
+bullet = Entity(model='circle', scale=.01,collider='box',
         move_dir=Vec3(0,0,0),   # Bullet movement direction
         TOTAL_TIME = 2.0,       # Time until the bullet stops
         bullet_timer = 0.0,     # Time the bullet has been active
@@ -29,44 +30,52 @@ bullet = Entity(model='circle', scale=.01, collider='box',
         state=BulletState.HELD  # Bullet state
     )
 
+
 # Define enemy entity
 class EnemyMovePattern(Enum):
-    HLINE = 0       # travel back and forth on a horizontal line
-    VLINE = 1       # travel back and forth on a vertical line
-    BOX = 2         # travel in a box pattern
-    FOLLOW = 3      # follow towards the player position
+    HLINE = 0  # travel back and forth on a horizontal line
+    VLINE = 5  # travel back and forth on a vertical line
+    BOX = 0  # travel in a box pattern
+    FOLLOW = 2  # follow towards the player position
+
 
 class Enemy(Entity):
-    def __init__(self, position, name, pattern,starting_direction):
+    def __init__(self, position, name, pattern, starting_direction):
         Entity.__init__(self)
 
-        self.entity = Entity(model='circle', scale=.08, collider='sphere',
-            mov_dir=Vec3(0,0,0),                        # Unit movement direction
-            speed = 0.4,                                # Unit speed
-            color=color.gray,
-            position=position,                          # Unit current position
-            starting_position=position,                 # Unit starting position
-            name=name,                                  # unit name, just in case
-            pattern = pattern,                          # Pathing placeholder
-            starting_direction=starting_direction       # initial movement
-        )
-        
-# Add enemies here by giving them 
-# a spawning poing Vector 
+        self.entity = Entity(scale=.05, disabled=True, collider='sphere',
+                             mov_dir=Vec3(0, 0, 0),  # Unit movement direction
+                             speed=0.4,  # Unit speed
+                             color=color.gray,
+                             position=position,  # Unit current position
+                             starting_position=position,  # Unit starting position
+                             name=name,  # unit name, just in case
+                             pattern=pattern,  # Pathing placeholder
+                             starting_direction=starting_direction  # initial movement
+                             )
+
+
+# Add enemies here by giving them
+# a spawning poing Vector
 # a placeholder name that is probably not neccesary
-# a pattern from the EnemyMovePattern Enum 
+# a pattern from the EnemyMovePattern Enum
 # a starting Vector so it knows which way to begin moving in
 enemy_list = [
-    Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.FOLLOW, starting_direction=Vec3(0.0, 0.0, 0.0))
-    # Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0)),
-    # Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0)),
+    Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.FOLLOW,starting_direction=Vec3(0.0, 0.0, 0.0))
+    #Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0)),
+    #Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0)),
     # Enemy(position=Vec3(-0.2, -0.1, 0.0), name="thing3", pattern=EnemyMovePattern.BOX, starting_direction=Vec3(1.0, 0.0, 0.0))
 ]
 
 # now for some adjustments per enemy entity that couldn't work inside the class init
-for enemy in enemy_list: 
-    enemy.entity.collider = SphereCollider(enemy.entity, radius=.8) # adjust colliders
-    enemy.entity.speed += random.randrange(0,5)*0.05 # tweak the speed to be randomish per enemy
+for enemy in enemy_list:
+    enemy.entity.collider = SphereCollider(enemy, radius=.8)  # adjust colliders
+    enemy.entity.speed += random.randrange(0, 5) * 0.05  # tweak the speed to be randomish per enemy
+    r_sprite = SpriteSheetAnimation(parent=enemy.entity,texture="/assets/robot_sprite_walk.png", autoplay=True,tileset_scale=[2, 2],
+                                    tileset_size=[4, 4], fps=4,
+                                    animations={'idle': ((0, 3), (3, 3)), 'walk_down': ((0, 3), (3, 3)),
+                                                'walk_up': ((0, 2), (3, 2)), 'walk_left': ((0, 1), (3, 1)),
+                                                'walk_right': ((0, 0), (3, 0))})
 
 # Wall entities
 walls = [
@@ -87,14 +96,14 @@ def enemy_wall_collision(enemy, enemy_speed):
         enemy_collision_done = False
         wall_ignore_list = [bullet, player, enemy]
         while not enemy_collision_done:
-            hit_info = raycast(origin=enemy.position, direction=enemy.move_dir, distance=enemy_speed, ignore=wall_ignore_list, debug=False)
+            hit_info = raycast(origin=enemy.position, direction=enemy.move_dir, distance=enemy_speed,
+                               ignore=wall_ignore_list, debug=False)
             if hit_info.hit:
                 vec_from_p = enemy.move_dir * enemy_speed
                 vec_a = -enemy.move_dir * (enemy_speed - hit_info.distance)
                 vec_b = hit_info.normal
                 # Skip colliding with inside of walls
                 if vec_a.dot(vec_b) >= 0:
-
                     proj_a_to_b = vec_a.dot(vec_b) * vec_b
 
                     target_vec = vec_from_p + proj_a_to_b
@@ -103,10 +112,11 @@ def enemy_wall_collision(enemy, enemy_speed):
                     target_vec -= target_vec.normalized() * 0.01
 
                     enemy.move_dir = target_vec.normalized()
-                    enemy_speed = distance(Vec3(0,0,0), target_vec)
+                    enemy_speed = distance(Vec3(0, 0, 0), target_vec)
                 wall_ignore_list.append(hit_info.entity)
             else:
                 enemy_collision_done = True
+
 
 def update_enemy(enemy):
     # enemy movement logic
@@ -116,11 +126,11 @@ def update_enemy(enemy):
     match enemy.pattern:
         case EnemyMovePattern.HLINE:
             enemy.move_dir = enemy.starting_direction
-            
+
             # compare current and starting positions
             # if it moves too far one way, reverse and head back the other way
             if abs(enemy.x) > abs(enemy.starting_position.x + .5):
-                enemy.move_dir.x = -enemy.move_dir.x # Reverse direction
+                enemy.move_dir.x = -enemy.move_dir.x  # Reverse direction
             enemy_speed = enemy.speed * time.dt
 
         case EnemyMovePattern.VLINE:
@@ -128,7 +138,7 @@ def update_enemy(enemy):
 
             # compare current and starting positions
             if abs(enemy.y) > abs(enemy.starting_position.y + .5):
-                enemy.move_dir.y = -enemy.move_dir.y # Reverse direction
+                enemy.move_dir.y = -enemy.move_dir.y  # Reverse direction
             enemy_speed = enemy.speed * time.dt
 
         case EnemyMovePattern.BOX:
@@ -140,13 +150,12 @@ def update_enemy(enemy):
             if abs(enemy.y) > abs(enemy.starting_position.y + .5):
                 enemy.rotation_x -= time.dt * 100
             enemy_speed = enemy.speed * time.dt
-            
+
         case EnemyMovePattern.FOLLOW:
             # find where player is and begin moving in that direction
             # this logic isn't working super effectively but it...kinda works
             enemy.move_dir = player.position.normalized()
             enemy_speed = enemy.speed * time.dt
-            
 
     # enemy wall collision
     enemy_wall_collision(enemy, enemy_speed)
@@ -154,11 +163,27 @@ def update_enemy(enemy):
     # Move enemy
     enemy.position += enemy.move_dir * enemy_speed
 
+
+
 def update():
+    scene.entities = [player, bullet, enemy]
     # Player logic
+    global startingGame
+    if startingGame == True:
+        startTitle.enable()
+
+        if held_keys["enter"]:
+            startingGame = False
+            startTitle.disable()
+
+
+
+
     player.move_dir = Vec3(held_keys['d'] - held_keys['a'], held_keys['w'] - held_keys['s'], 0).normalized()
     player_speed = player.speed * time.dt
-
+    # n_robs = 3
+    # for r in range(n_robs):
+    #     enemy_list.append(enemy.entity)
     # Player collision for walls
     if abs(player.move_dir.x) + abs(player.move_dir.y) != 0.0:
         player_collision_done = False
@@ -200,11 +225,15 @@ def update():
             bullet_speed = bullet.speed * (bullet.bullet_timer / bullet.TOTAL_TIME) * time.dt
 
             # Bounce bullet off walls
-            hit_info = raycast(bullet.position, bullet.move_dir, ignore=(bullet,player), distance=bullet_speed, debug=False)
+            hit_info = raycast(bullet.position,
+                               bullet.move_dir,
+                               ignore=[bullet,player],
+                               distance=bullet_speed,
+                               debug=False)
             if hit_info.hit:
                 bullet.move_dir = bullet.move_dir - 2 * (bullet.move_dir.dot(hit_info.normal)) * hit_info.normal
-		
-		#when bullet hits objects, that are not enemies
+
+                #when bullet hits objects, that are not enemies
                 ting = Entity(name='ting_parent', model='circle', scale=Vec3(.1, .1, 0))
                 tingText = Text(text='TING', origin=(0, 0))
                 ting.position = bullet.position
@@ -215,7 +244,7 @@ def update():
                 sounds.bullet_bounce_sound.play()
 
             bullet.position += bullet.move_dir * bullet_speed
-		
+
             # When time runs out, drop the bullet
             bullet.bullet_timer -= time.dt
             if (bullet.bullet_timer <= 0.0):
@@ -226,11 +255,9 @@ def update():
                 # Player picks up bullet
                 bullet.state = BulletState.HELD
                 sounds.reload_sound.play()
-    
-    for enemy in enemy_list:
-        update_enemy(enemy.entity)
 
 def input(key):
+
     if key == "left mouse down":
         # Fire bullet
         if bullet.state == BulletState.HELD:
@@ -238,8 +265,8 @@ def input(key):
             bullet.position = player.position
             bullet.move_dir = (mouse.position - player.position).normalized()
             bullet.bullet_timer = bullet.TOTAL_TIME
-		
-	   # bang sound effect bubble
+
+       # bang sound effect bubble
             bang = Entity(name='bang_parent', model='circle', scale=Vec3(.1, .1, 0), origin=(.5, .5))
             bangText = Text(text='BANG', origin=(.75,1.75))
             bang.enable()
@@ -251,4 +278,16 @@ def input(key):
             bangText.fade_out(duration=.2)
             sounds.shoot_sound.play()
 
+    if key == False:
+        p_sprite.play_animation('idle')
+    if key == 'd':
+        p_sprite.play_animation('walk_right')
+    if key == 's':
+        p_sprite.play_animation('walk_down')
+    if key == 'a':
+        p_sprite.play_animation('walk_left')
+    if key == 'w':
+        p_sprite.play_animation('walk_up')
+
+startingGame = True
 app.run()
