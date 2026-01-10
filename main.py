@@ -61,9 +61,9 @@ class Enemy(Entity):
 # a pattern from the EnemyMovePattern Enum
 # a starting Vector so it knows which way to begin moving in
 enemy_list = [
-    Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.FOLLOW,starting_direction=Vec3(0.0, 0.0, 0.0))
-    #Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0)),
-    #Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0)),
+    # Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.FOLLOW,starting_direction=Vec3(0.0, 0.0, 0.0))
+    Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0)),
+    Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0))
     # Enemy(position=Vec3(-0.2, -0.1, 0.0), name="thing3", pattern=EnemyMovePattern.BOX, starting_direction=Vec3(1.0, 0.0, 0.0))
 ]
 
@@ -166,7 +166,7 @@ def update_enemy(enemy):
 
 
 def update():
-    scene.entities = [player, bullet, enemy]
+    scene.entities = [player, bullet] # for some reason adding enemy here results in an error because it isn't quite defined in this scope or something
     # Player logic
     global startingGame
     if startingGame:
@@ -175,6 +175,8 @@ def update():
         if held_keys["enter"]:
             startingGame = False
             startTitle.disable()
+            for enemy in enemy_list:
+                enemy.entity.enable()      
         return
 
 
@@ -256,6 +258,9 @@ def update():
                 # Player picks up bullet
                 bullet.state = BulletState.HELD
                 sounds.reload_sound.play()
+    
+    for enemy in enemy_list:
+        update_enemy(enemy.entity)
 
 def input(key):
     if startingGame: return
