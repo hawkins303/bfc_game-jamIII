@@ -169,12 +169,13 @@ def update():
     scene.entities = [player, bullet, enemy]
     # Player logic
     global startingGame
-    if startingGame == True:
+    if startingGame:
         startTitle.enable()
 
         if held_keys["enter"]:
             startingGame = False
             startTitle.disable()
+        return
 
 
 
@@ -257,6 +258,7 @@ def update():
                 sounds.reload_sound.play()
 
 def input(key):
+    if startingGame: return
 
     if key == "left mouse down":
         # Fire bullet
