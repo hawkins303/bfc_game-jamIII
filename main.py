@@ -11,7 +11,7 @@ from sound_collection import SoundCollection
 
 app = Ursina()
 sounds = SoundCollection()
-startTitle = Entity(model="quad", texture="/assets/title.png",disabled=True,position=Vec3(0,0,-3))
+startTitle = Entity(model="quad", texture="/assets/title.png",disabled=True,position=Vec3(0,0,-3), scale=(1.5,.9,1))
 window.color = color.black
 camera.orthographic = True
 camera.fov = 1
@@ -164,7 +164,9 @@ def update_enemy(enemy):
     if enemy.intersects(bullet) and bullet.state == BulletState.SHOOTING:
         sounds.enemy_hit.play()
         # Guess I'll die
-        #r_sprite.play_animation('death')
+        r_sprite.play_animation('death')
+        enemy.fade_out(duration=4)
+
 
     # enemy player collision
     if enemy.intersects(player) and enemy.enabled:
