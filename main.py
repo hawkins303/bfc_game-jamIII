@@ -164,9 +164,9 @@ def update_enemy(enemy):
     if enemy.intersects(bullet) and bullet.state == BulletState.SHOOTING:
         sounds.enemy_hit.play()
         # Guess I'll die
+        enemy.collider = None
+        enemy.speed = 0.0
         r_sprite.play_animation('death')
-        enemy.fade_out(duration=4)
-
 
     # enemy player collision
     if enemy.intersects(player) and enemy.enabled:
@@ -182,6 +182,7 @@ def update_enemy(enemy):
 
 
 def update():
+
 
     global startingGame
     if startingGame:
