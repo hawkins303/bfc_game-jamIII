@@ -40,7 +40,7 @@ class EnemyMovePattern(Enum):
 
 
 class Enemy(Entity):
-    def __init__(self, position, name, pattern, starting_direction):
+    def __init__(self, position, name, pattern, starting_direction,movement_distance):
         Entity.__init__(self)
 
         self.entity = Entity(scale=.05, disabled=True, collider='sphere',
@@ -51,7 +51,8 @@ class Enemy(Entity):
                              starting_position=position,  # Unit starting position
                              name=name,  # unit name, just in case
                              pattern=pattern,  # Pathing placeholder
-                             starting_direction=starting_direction  # initial movement
+                             starting_direction=starting_direction,  # initial movement
+                             movement_distance=movement_distance    # how far to move from spawn point, if applicable
                              )
 
 
@@ -62,8 +63,8 @@ class Enemy(Entity):
 # a starting Vector so it knows which way to begin moving in
 enemy_list = [
     # Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.FOLLOW,starting_direction=Vec3(0.0, 0.0, 0.0))
-    Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0)),
-    Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0))
+    Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.5),
+    Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0), movement_distance=.5)
     # Enemy(position=Vec3(-0.2, -0.1, 0.0), name="thing3", pattern=EnemyMovePattern.BOX, starting_direction=Vec3(1.0, 0.0, 0.0))
 ]
 
@@ -156,6 +157,18 @@ def update_enemy(enemy):
             # this logic isn't working super effectively but it...kinda works
             enemy.move_dir = player.position.normalized()
             enemy_speed = enemy.speed * time.dt
+
+    # enemy bullet collision
+    if enemy.intersects(bullet) and bullet.state == BulletState.SHOOTING:
+        sounds.enemy_hit.play()
+        # Guess I'll die
+        enemy.disable()
+
+    # enemy player collision
+    if enemy.intersects(player) and enemy.enabled:
+        # Game over man, game over
+        sounds.player_hit.play() # this repeats a bunch because i haven't figured out better logic
+        
 
     # enemy wall collision
     enemy_wall_collision(enemy, enemy_speed)
@@ -261,7 +274,7 @@ def update():
     
     for enemy in enemy_list:
         update_enemy(enemy.entity)
-
+        
 def input(key):
     if startingGame: return
 
