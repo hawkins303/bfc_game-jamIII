@@ -264,7 +264,7 @@ def update():
             bullet.color = color.clear
         case BulletState.SHOOTING:
 
-            bullet.color = color.white
+            bullet.color = color.gold
             # Reduce speed over time
             bullet_speed = bullet.speed * (bullet.bullet_timer / bullet.TOTAL_TIME) * time.dt
 
@@ -294,7 +294,7 @@ def update():
             if (bullet.bullet_timer <= 0.0):
                 bullet.state = BulletState.DROPPED
         case BulletState.DROPPED:
-            bullet.color = color.white
+            bullet.color = color.gold
             if bullet.intersects(player).hit:
                 # Player picks up bullet
                 bullet.state = BulletState.HELD
