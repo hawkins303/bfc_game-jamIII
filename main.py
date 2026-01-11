@@ -58,7 +58,7 @@ class Enemy(Entity):
         Entity.__init__(self)
         self.entity = Entity(scale=.05, disabled=True, collider='sphere',
                              mov_dir=Vec3(0, 0, 0),  # Unit movement direction
-                             speed=0.4,  # Unit speed
+                             speed=0.3,  # Unit speed
                              color=color.gray,
                              position=position,  # Unit current position
                              starting_position=position,  # Unit starting position
@@ -76,15 +76,15 @@ class Enemy(Entity):
 # a starting Vector so it knows which way to begin moving in
 enemy_list = [
     #Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1",pattern=EnemyMovePattern.HLINE,starting_direction=Vec3(0.0, 0.0, 0.0),movement_distance=.5),
-    Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.5),
-    Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0), movement_distance=.5)
-    # Enemy(position=Vec3(-0.2, -0.1, 0.0), name="thing3", pattern=EnemyMovePattern.BOX, starting_direction=Vec3(1.0, 0.0, 0.0))
+    Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.4),
+    Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0), movement_distance=.4),
+    Enemy(position=Vec3(-0.2, -0.1, 0.0), name="thing3", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.4)
 ]
 
 # now for some adjustments per enemy entity that couldn't work inside the class init
 for enemy in enemy_list:
     enemy.entity.collider = SphereCollider(enemy, radius=.8)  # adjust colliders
-    enemy.entity.speed += random.randrange(0, 5) * 0.05  # tweak the speed to be randomish per enemy
+    enemy.entity.speed += random.randrange(0, 3) * 0.05  # tweak the speed to be randomish per enemy
     enemy.entity.r_sprite = SpriteSheetAnimation(parent=enemy.entity, texture="/assets/robot_sprite_walk1.png", autoplay=True,tileset_size=[4, 5], fps=2,
                                     animations={'idle': ((0, 4), (3, 4)), 'walk_down': ((0, 4), (3, 4)),
                                                 'walk_up': ((0, 3), (3, 3)), 'walk_left': ((0, 2), (3, 2)),
@@ -149,7 +149,7 @@ def update_enemy(enemy):
             enemy.move_dir = enemy.starting_direction
             # compare current and starting positions
             # if it moves too far one way, reverse and head back the other way
-            if abs(enemy.x) > abs(enemy.starting_position.x + .5):
+            if abs(enemy.x) > abs(enemy.starting_position.x + enemy.movement_distance):
                 enemy.move_dir.x = -enemy.move_dir.x # Reverse direction
 
             enemy_speed = enemy.speed * time.dt
@@ -158,7 +158,7 @@ def update_enemy(enemy):
             enemy.move_dir = enemy.starting_direction
 
             # compare current and starting positions
-            if abs(enemy.y) > abs(enemy.starting_position.y + .5):
+            if abs(enemy.y) > abs(enemy.starting_position.y + enemy.movement_distance):
                 enemy.move_dir.y = -enemy.move_dir.y  # Reverse direction
             enemy_speed = enemy.speed * time.dt
 
