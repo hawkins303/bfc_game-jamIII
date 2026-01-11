@@ -12,10 +12,14 @@ from sound_collection import SoundCollection
 app = Ursina()
 sounds = SoundCollection()
 startTitle = Entity(model="quad", texture="/assets/title.png",disabled=True,position=Vec3(0,0,-3), scale=(1.5,.9,1))
+endTitle = Entity(model="quad", texture="/assets/game_over.png",disabled=True,position=Vec3(0,0,-3), scale=(1.5,.9,1))
+endTitle.disable()
 window.color = color.black
 camera.orthographic = True
 camera.fov = 1
 speed = .5
+
+gameover = False
 
 class BulletState(Enum):
     HELD = 0
@@ -121,6 +125,7 @@ def enemy_wall_collision(enemy, enemy_speed):
 
 
 def update_enemy(enemy):
+    global gameover
     # enemy movement logic
 
     # set move direction and speed per enemy unit
@@ -172,18 +177,19 @@ def update_enemy(enemy):
     if enemy.intersects(player) and enemy.enabled:
         # Game over man, game over
         sounds.player_hit.play() # this repeats a bunch because i haven't figured out better logic
+        gameover = True
+        p_sprite.play_animation('death')
+       # endTitle.enable()
 
 
     # enemy wall collision
-    enemy_wall_collision(enemy, enemy_speed)
+    #enemy_wall_collision(enemy, enemy_speed)
 
     # Move enemy
     enemy.position += enemy.move_dir * enemy_speed
 
 
 def update():
-
-
     global startingGame
     if startingGame:
         startTitle.enable()
@@ -193,6 +199,10 @@ def update():
             for enemy in enemy_list:
                 enemy.entity.enable()      
         return
+        
+    if gameover:
+        return
+
 
     # Player logic
     player.move_dir = Vec3(held_keys['d'] - held_keys['a'], held_keys['w'] - held_keys['s'], 0).normalized()
@@ -276,7 +286,7 @@ def update():
         update_enemy(enemy.entity)
         
 def input(key):
-    if startingGame: return
+    if startingGame or gameover: return
 
     if key == "left mouse down":
         # Fire bullet
