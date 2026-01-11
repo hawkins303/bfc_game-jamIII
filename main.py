@@ -14,6 +14,7 @@ sounds = SoundCollection()
 startTitle = Entity(model="quad", texture="/assets/title.png",disabled=True,position=Vec3(0,0,-3), scale=(1.5,.9,1))
 endTitle = Entity(model="quad", texture="/assets/game_over.png",disabled=True,position=Vec3(0,0,-3), scale=(1.5,.9,1))
 endTitle.disable()
+floor = Entity(model="quad",texture="/assets/floor.png", position=Vec3(0,0,5))
 window.color = color.black
 camera.orthographic = True
 camera.fov = 1
@@ -24,6 +25,8 @@ gameover_sequence = Sequence(
     endTitle.enable,
     loop=False
 )
+
+
 
 gameover = False
 
