@@ -94,15 +94,15 @@ for enemy in enemy_list:
 
 # Wall entities
 walls = [
-    Entity(position = Vec3(0.0, 0.5, 0.0), scale=Vec3(1.4, 0.05, 1), model='quad', collider='box'),
-    Entity(position = Vec3(0.0, -0.5, 0.0), scale=Vec3(1.4, 0.05, 1), model='quad', collider='box'),
-    Entity(position = Vec3(0.5, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box'),
-    Entity(position = Vec3(-0.5, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box'),
+    Entity(position = Vec3(0.0, 0.5, 0.0), scale=Vec3(1.4, 0.05, 1), model='quad', collider='box', texture="/assets/wall.jpg", texture_scale=(28,1)),
+    Entity(position = Vec3(0.0, -0.5, 0.0), scale=Vec3(1.4, 0.05, 1), model='quad', collider='box', texture="/assets/wall.jpg", texture_scale=(28,1)),
+    Entity(position = Vec3(0.5, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box', texture="/assets/wall.jpg", texture_scale=(1,20)),
+    Entity(position = Vec3(-0.5, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box', texture="/assets/wall.jpg", texture_scale=(1,20)),
     
-    Entity(position = Vec3(-0.3, 0.2, 0.0), scale=Vec3(0.2, 0.05, 1), model='quad', collider='box'),
-    Entity(position = Vec3(0.4, 0.1, 0.0), scale=Vec3(0.05, .15, 1), model='quad', collider='box'),
-    Entity(position = Vec3(-0.3, -0.3, 0.0), rotation=Vec3(0, 0, -10), scale=Vec3(0.05, .15, 1), model='quad', collider='box'),
-    Entity(position = Vec3(0.4, -0.4, 0.0), rotation=Vec3(0, 0, 45), scale=Vec3(0.05, .15, 1), model='quad', collider='box'),
+    Entity(position = Vec3(-0.3, 0.2, 0.0), scale=Vec3(0.2, 0.05, 1), model='quad', collider='box', texture="/assets/wall.jpg", texture_scale=(4,1)),
+    Entity(position = Vec3(0.4, 0.1, 0.0), scale=Vec3(0.05, .15, 1), model='quad', collider='box', texture="/assets/wall.jpg", texture_scale=(1,3)),
+    Entity(position = Vec3(-0.3, -0.3, 0.0), rotation=Vec3(0, 0, -10), scale=Vec3(0.05, .15, 1), model='quad', collider='box', texture="/assets/wall.jpg", texture_scale=(1,3)),
+    Entity(position = Vec3(0.4, -0.4, 0.0), rotation=Vec3(0, 0, 45), scale=Vec3(0.05, .15, 1), model='quad', collider='box', texture="/assets/wall.jpg", texture_scale=(1,3))
 ]
 
 sounds.background_sound.play(start=0)
