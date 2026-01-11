@@ -5,9 +5,9 @@ class SoundCollection(Entity):
         super().__init__()
 
         self.background_sound = Audio(
-            'BFC-gj3_take2.wav',
-            volume=1,
-            volume_multiplier=.25,
+            'BFC-gj3_take3.wav',
+            volume=3,
+            volume_multiplier=.5,
             loop=True,
             autoplay=True
         )
