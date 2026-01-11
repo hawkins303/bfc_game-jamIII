@@ -56,7 +56,6 @@ class EnemyMovePattern(Enum):
 class Enemy(Entity):
     def __init__(self, position, name, pattern, starting_direction,movement_distance):
         Entity.__init__(self)
-
         self.entity = Entity(scale=.05, disabled=True, collider='sphere',
                              mov_dir=Vec3(0, 0, 0),  # Unit movement direction
                              speed=0.4,  # Unit speed
@@ -86,11 +85,11 @@ enemy_list = [
 for enemy in enemy_list:
     enemy.entity.collider = SphereCollider(enemy, radius=.8)  # adjust colliders
     enemy.entity.speed += random.randrange(0, 5) * 0.05  # tweak the speed to be randomish per enemy
-    r_sprite = SpriteSheetAnimation(parent=enemy.entity, texture="/assets/robot_sprite_walk1.png", autoplay=True,tileset_size=[4, 5], fps=2,
+    enemy.entity.r_sprite = SpriteSheetAnimation(parent=enemy.entity, texture="/assets/robot_sprite_walk1.png", autoplay=True,tileset_size=[4, 5], fps=2,
                                     animations={'idle': ((0, 4), (3, 4)), 'walk_down': ((0, 4), (3, 4)),
                                                 'walk_up': ((0, 3), (3, 3)), 'walk_left': ((0, 2), (3, 2)),
                                                'walk_right': ((0, 1), (3, 1)), 'death':((0,0),(1, 0))})
-    r_sprite.play_animation('idle')
+    enemy.entity.r_sprite.play_animation('idle')
 
 # Wall entities
 walls = [
@@ -185,7 +184,7 @@ def update_enemy(enemy):
         # Guess I'll die
         enemy.collider = None
         enemy.speed = 0.0
-        r_sprite.play_animation('death')
+        enemy.r_sprite.play_animation('death')
 
     # enemy player collision
     if enemy.intersects(player) and enemy.enabled:
