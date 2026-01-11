@@ -94,10 +94,15 @@ for enemy in enemy_list:
 
 # Wall entities
 walls = [
-    Entity(position = Vec3(0.0, 0.5, 0.0), scale=Vec3(1.4, 0.05, 1), color=color.blue, model='quad', collider='box'),
-    Entity(position = Vec3(0.0, -0.5, 0.0), scale=Vec3(1.4, 0.05, 1),color=color.blue, model='quad', collider='box'),
+    Entity(position = Vec3(0.0, 0.5, 0.0), scale=Vec3(1.4, 0.05, 1), model='quad', collider='box'),
+    Entity(position = Vec3(0.0, -0.5, 0.0), scale=Vec3(1.4, 0.05, 1), model='quad', collider='box'),
     Entity(position = Vec3(0.7, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box'),
     Entity(position = Vec3(-0.7, 0.0, 0.0), scale=Vec3(.05, 1.0, 1), model='quad', collider='box'),
+    
+    Entity(position = Vec3(-0.56, 0.2, 0.0), scale=Vec3(0.2, 0.05, 1), model='quad', collider='box'),
+    Entity(position = Vec3(0.6, 0.1, 0.0), scale=Vec3(0.05, .15, 1), model='quad', collider='box'),
+    Entity(position = Vec3(-0.3, -0.3, 0.0), rotation=Vec3(0, 0, -10), scale=Vec3(0.05, .15, 1), model='quad', collider='box'),
+    Entity(position = Vec3(0.4, -0.4, 0.0), rotation=Vec3(0, 0, 45), scale=Vec3(0.05, .15, 1), model='quad', collider='box'),
 ]
 
 sounds.background_sound.play(start=0)
@@ -116,7 +121,7 @@ def enemy_wall_collision(enemy, enemy_speed):
             if hit_info.hit:
                 vec_from_p = enemy.move_dir * enemy_speed
                 vec_a = -enemy.move_dir * (enemy_speed - hit_info.distance)
-                vec_b = hit_info.normal
+                vec_b = hit_info.world_normal
                 # Skip colliding with inside of walls
                 if vec_a.dot(vec_b) >= 0:
                     proj_a_to_b = vec_a.dot(vec_b) * vec_b
@@ -229,7 +234,7 @@ def update():
             if hit_info.hit:
                 vec_from_p = player.move_dir * player_speed
                 vec_a = -player.move_dir * (player_speed - hit_info.distance)
-                vec_b = hit_info.normal
+                vec_b = hit_info.world_normal
                 # Skip colliding with inside of walls
                 if vec_a.dot(vec_b) >= 0:
 
@@ -267,7 +272,7 @@ def update():
                                distance=bullet_speed,
                                debug=False)
             if hit_info.hit:
-                bullet.move_dir = bullet.move_dir - 2 * (bullet.move_dir.dot(hit_info.normal)) * hit_info.normal
+                bullet.move_dir = bullet.move_dir - 2 * (bullet.move_dir.dot(hit_info.world_normal)) * hit_info.world_normal
 
                 #when bullet hits objects, that are not enemies
                 ting = Entity(name='ting_parent', model='circle', scale=Vec3(.1, .1, 0))
