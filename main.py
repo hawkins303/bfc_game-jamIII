@@ -58,7 +58,7 @@ class Enemy(Entity):
         Entity.__init__(self)
         self.entity = Entity(scale=.05, disabled=True, collider='sphere',
                              mov_dir=Vec3(0, 0, 0),  # Unit movement direction
-                             speed=0.3,  # Unit speed
+                             speed=0.1,  # Unit speed
                              color=color.gray,
                              position=position,  # Unit current position
                              starting_position=position,  # Unit starting position
@@ -84,7 +84,7 @@ enemy_list = [
 # now for some adjustments per enemy entity that couldn't work inside the class init
 for enemy in enemy_list:
     enemy.entity.collider = SphereCollider(enemy, radius=.8)  # adjust colliders
-    enemy.entity.speed += random.randrange(0, 3) * 0.05  # tweak the speed to be randomish per enemy
+    enemy.entity.speed += random.randrange(0, 3) * 0.1  # tweak the speed to be randomish per enemy
     enemy.entity.r_sprite = SpriteSheetAnimation(parent=enemy.entity, texture="/assets/robot_sprite_walk1.png", autoplay=True,tileset_size=[4, 5], fps=2,
                                     animations={'idle': ((0, 4), (3, 4)), 'walk_down': ((0, 4), (3, 4)),
                                                 'walk_up': ((0, 3), (3, 3)), 'walk_left': ((0, 2), (3, 2)),
@@ -149,8 +149,9 @@ def update_enemy(enemy):
             enemy.move_dir = enemy.starting_direction
             # compare current and starting positions
             # if it moves too far one way, reverse and head back the other way
-            if abs(enemy.x) > abs(enemy.starting_position.x + enemy.movement_distance):
+            if abs(enemy.x - enemy.starting_position.x) > enemy.movement_distance:
                 enemy.move_dir.x = -enemy.move_dir.x # Reverse direction
+                enemy.starting_position.x = enemy.x
 
             enemy_speed = enemy.speed * time.dt
 
@@ -158,8 +159,9 @@ def update_enemy(enemy):
             enemy.move_dir = enemy.starting_direction
 
             # compare current and starting positions
-            if abs(enemy.y) > abs(enemy.starting_position.y + enemy.movement_distance):
-                enemy.move_dir.y = -enemy.move_dir.y  # Reverse direction
+            if abs(enemy.y - enemy.starting_position.y) > enemy.movement_distance:
+                enemy.move_dir.y = -enemy.move_dir.y # Reverse direction
+                enemy.starting_position.y = enemy.y
             enemy_speed = enemy.speed * time.dt
 
         case EnemyMovePattern.BOX:
