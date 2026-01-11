@@ -58,7 +58,7 @@ class Enemy(Entity):
         Entity.__init__(self)
         self.entity = Entity(scale=.05, disabled=True, collider='sphere',
                              mov_dir=Vec3(0, 0, 0),  # Unit movement direction
-                             speed=0.1,  # Unit speed
+                             speed=0.2,  # Unit speed
                              color=color.gray,
                              position=position,  # Unit current position
                              starting_position=position,  # Unit starting position
@@ -77,8 +77,10 @@ class Enemy(Entity):
 enemy_list = [
     #Enemy(position=Vec3(0.1, 0.1, 0.0), name="thing1",pattern=EnemyMovePattern.HLINE,starting_direction=Vec3(0.0, 0.0, 0.0),movement_distance=.5),
     Enemy(position=Vec3(-0.1, 0.1, 0.0), name="thing1", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.4),
-    Enemy(position=Vec3(0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0), movement_distance=.4),
-    Enemy(position=Vec3(-0.2, -0.1, 0.0), name="thing3", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.4)
+    Enemy(position=Vec3(-0.1, -0.1, 0.0), name="thing2", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0), movement_distance=.5),
+    Enemy(position=Vec3(-0.15, -0.1, 0.0), name="thing3", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.5),
+    Enemy(position=Vec3(-0.2, -0.3, 0.0), name="thing4", pattern=EnemyMovePattern.HLINE, starting_direction=Vec3(1.0, 0.0, 0.0), movement_distance=.5),
+    Enemy(position=Vec3(-0.3, -0.2, 0.0), name="thing5", pattern=EnemyMovePattern.VLINE, starting_direction=Vec3(0.0, 1.0, 0.0), movement_distance=.3)
 ]
 
 # now for some adjustments per enemy entity that couldn't work inside the class init
