@@ -19,6 +19,12 @@ camera.orthographic = True
 camera.fov = 1
 speed = .5
 
+gameover_sequence = Sequence(
+    1,                              # wait 1 second
+    endTitle.enable,
+    loop=False
+)
+
 gameover = False
 
 class BulletState(Enum):
@@ -180,6 +186,7 @@ def update_enemy(enemy):
         gameover = True
         p_sprite.play_animation('death')
        # endTitle.enable()
+        gameover_sequence.start()
 
 
     # enemy wall collision
