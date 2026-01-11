@@ -14,6 +14,8 @@ sounds = SoundCollection()
 startTitle = Entity(model="quad", texture="/assets/title.png",disabled=True,position=Vec3(0,0,-3), scale=(1.5,.9,1))
 endTitle = Entity(model="quad", texture="/assets/game_over.png",disabled=True,position=Vec3(0,0,-3), scale=(1.5,.9,1))
 endTitle.disable()
+winTitle = Entity(model="quad", texture="/assets/victory.png",disabled=True,position=Vec3(0,0,-3), scale=(1.5,.9,1))
+winTitle.disable()
 floor = Entity(model="quad",texture="/assets/floor.png", position=Vec3(0,0,5))
 window.color = color.black
 camera.orthographic = True
@@ -92,6 +94,7 @@ for enemy in enemy_list:
                                                 'walk_up': ((0, 3), (3, 3)), 'walk_left': ((0, 2), (3, 2)),
                                                'walk_right': ((0, 1), (3, 1)), 'death':((0,0),(1, 0))})
     enemy.entity.r_sprite.play_animation('idle')
+    enemy.entity.dead = False
 
 # Wall entities
 walls = [
@@ -189,6 +192,7 @@ def update_enemy(enemy):
         enemy.collider = None
         enemy.speed = 0.0
         enemy.r_sprite.play_animation('death')
+        enemy.dead = True
 
     # enemy player collision
     if enemy.intersects(player) and enemy.enabled:
@@ -207,8 +211,12 @@ def update_enemy(enemy):
     enemy.position += enemy.move_dir * enemy_speed
 
 
+have_we_won = False
+
 def update():
     global startingGame
+    global have_we_won
+    
     if startingGame:
         startTitle.enable()
         if held_keys["enter"]:
@@ -220,7 +228,18 @@ def update():
         
     if gameover:
         return
+        
+    if have_we_won:
+        return
 
+    have_we_won = True
+    for enemy in enemy_list:
+        if not enemy.entity.dead:
+            have_we_won = False
+            break
+
+    if have_we_won:
+        winTitle.enable()
 
     # Player logic
     player.move_dir = Vec3(held_keys['d'] - held_keys['a'], held_keys['w'] - held_keys['s'], 0).normalized()
